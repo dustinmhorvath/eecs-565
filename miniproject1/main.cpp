@@ -8,51 +8,67 @@ public:
   std::string key;
 
   VigenereCipher(std::string key){
-    for(int i = 0; i < key.size(); ++i)
-    {
-      if(key[i] >= 'A' && key[i] <= 'Z')
-        this->key += key[i];
-      else if(key[i] >= 'a' && key[i] <= 'z')
-        this->key += key[i] + 'A' - 'a';
+    // Force key to uppercase alphanumeric
+    for(int i = 0; i < key.size(); ++i){
+      if(key[i] >= 'A' && key[i] <= 'Z'){
+        this -> key += key[i];
+      }
+      else if(key[i] >= 'a' && key[i] <= 'z'){
+        this -> key += key[i] + 'A' - 'a';
+      }
     }
   }
 
   std::string encrypt(std::string text){
-    std::string out;
+    std::string encrypted;
 
+    // Loop across plaintext chars
     for(int i = 0, j = 0; i < text.length(); ++i){
-      char c = text[i];
+      // Read input character at index i
+      char plain = text[i];
 
-      if(c >= 'a' && c <= 'z'){
-        c += 'A' - 'a';
+      // Force characters to UP
+      if(plain <= 'z' && plain >= 'a'){
+        plain = plain + 'A' - 'a';
       }
-      else if(c < 'A' || c > 'Z'){
+      // Discard non-alphabetic characters 
+      else if(plain < 'A' || plain > 'Z'){
         continue;
       }
-      out += (c + key[j] - 2*'A') % 26 + 'A';
+
+      // Use viginere algorithm
+      encrypted += (plain + key[j] - 2*'A') % 26 + 'A';
+      // Build out return string
       j = (j + 1) % key.length();
     }
-
-    return out;
+    return encrypted;
   }
 
   std::string decrypt(std::string text){
-    std::string out;
+    std::string decrypted;
 
-    for(int i = 0, j = 0; i < text.length(); ++i)
-    {
-      char c = text[i];
-
-      if(c >= 'a' && c <= 'z')
-        c += 'A' - 'a';
-      else if(c < 'A' || c > 'Z')
+    // Loop across ciphertext chars
+    for(int i = 0, j = 0; i < text.length(); ++i){
+      // Read in a ciphertext character
+      char ciph = text[i];
+      // Force to uppercase
+      if(ciph >= 'a' && ciph <= 'z'){
+        ciph += 'A' - 'a';
+      }
+      /*
+       * Discard non-alphabetic chars.
+       * This is helpful because it hides word breaks and punctuation.
+       */
+      else if(ciph < 'A' || ciph > 'Z'){
         continue;
+      }
 
-      out += (c - key[j] + 26) % 26 + 'A';
+      // Reverse of viginere from above
+      decrypted += (ciph - key[j] + 26) % 26 + 'A';
       j = (j + 1) % key.length();
     }
 
-    return out;
+    return decrypted;
   }
 };
 
@@ -91,7 +107,7 @@ int main(){
   std::string encrypted = viginere.encrypt(input);
   std::string decrypted = viginere.decrypt(encrypted);
 
-  std::cout << input << std::endl;
-  std::cout << "Encrypted: " << encrypted << std::endl;
+  std::cout << "Plaintext: " << input << std::endl;
+  std::cout << "Ciphertext: " << encrypted << std::endl;
   std::cout << "Decrypted: " << decrypted << std::endl;
 }
