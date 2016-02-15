@@ -77,31 +77,35 @@ int main(){
   std::string tempLine;
   std::string input = "";
 
+  // Read in key file
   std::ifstream keystream ("key.txt");
   if(keystream.is_open()){
     while(keystream.good()){
+      // Read lines
       getline(keystream,tempLine);
       key = key + tempLine;
     }
     keystream.close();
   }
+  else{
+    std::cout << "Unable to open key file" << std::endl << std::endl;
+  }
 
   VigenereCipher viginere(key);
 
   std::string line;
+  // Read in plaintext input
   std::ifstream inputstream ("input.txt");
-  if (inputstream.is_open())
-  {
-    while (inputstream.good())
-    {
+  if (inputstream.is_open()){
+    while (inputstream.good()){
+      // Read plaintext lines from file input
       getline(inputstream,line);
       input = input + line;
     }
     inputstream.close();
   }
-  else
-  {
-    std::cout << "Unable to open file" << std::endl << std::endl;
+  else{
+    std::cout << "Unable to open plaintext file" << std::endl << std::endl;
   }
 
   std::string encrypted = viginere.encrypt(input);
