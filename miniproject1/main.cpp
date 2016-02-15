@@ -1,3 +1,12 @@
+/*
+ * Dustin Horvath
+ * 2729265
+ * ViginereCipher Miniproject 1
+ * EECS 565
+ * 2/15/16
+ * 
+ */
+
 #include <iostream>
 #include <string>
 #include <fstream>
