@@ -10,10 +10,11 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <map>
-#include <set>
-#include <algorithm>
+#include <queue>
+//#include <algorithm>
 
 bool isZs(char* key, int keylength){
   bool notzs = true;
@@ -43,27 +44,23 @@ class VigenereCipher {
 
 public:
   std::string key;
-  std::set<std::string> wordset;
-
+  std::map<std::string, int> m;
+  std::queue<std::string> possiblekeys;
 
   void storeDict(std::string dictionaryFile){
     std::ifstream file(dictionaryFile);
     std::string line;
 
     int i = 1;
+
     while(std::getline(file, line)){
-      wordset.insert(line);
+      std::stringstream lineStream(line);
+      std::string value;
+      while(lineStream >> value){
+        m.insert( std::pair<std::string,int>(value,i) );
+      }
       i++;
     }
-
-    std::set<std::string>::const_iterator it = std::find(wordset.begin(), wordset.end(), "CAESAR");
-
-      if (it != wordset.end()){
-           std::cout << "Found '" << *it << "' in the vector." << std::endl;
-      }
-
-
-
   }
 
   VigenereCipher(std::string dictionaryFile){
@@ -160,21 +157,22 @@ public:
     while(!isZs(keyArr, keylength)){
 
       plaintext = decrypt(ciphertext.substr(0, firstwordlength));
-      //std::cout << plaintext << " " << i << " ";
-      
-      std::set<std::string>::const_iterator it = std::find(wordset.begin(), wordset.end(), plaintext);
 
-      if (it != wordset.end()){
-           std::cout << "Found '" << *it << "' in the vector." << std::endl;
+      auto it = m.find(plaintext);
+      if (it != m.end()){
+        std::cout << "Found string " << plaintext << " at " << it->second << "\n";
+        possiblekeys.push(key);
       }
-      i++;
 
       char* newKey = keyInc(keyArr, keylength);
       setKey(std::string(newKey, keylength));
-      //std::cout << key << "\n";
     }
 
-
+    //while this stuff
+    std::cout << possiblekeys.front() << std::endl;
+    setKey(possiblekeys.front());
+    plaintext = decrypt(ciphertext);
+    std::cout << "Plaintext with key " << key << " is " << plaintext << "\n";
   }
 
 };
