@@ -11,13 +11,55 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <map>
+
+bool isZs(char* key, int keylength){
+  bool notzs = true;
+  for(int i = 0; i < keylength; i++){
+    if(key[i] != 'Z'){
+      notzs = false;
+    }
+  }
+  return notzs;
+}
+
+char* keyInc(char* key, int keylength){
+  key[keylength - 1] = static_cast<char>(key[keylength - 1] + 1);
+
+  for(int i = keylength - 1; i > 0; i--){
+    if(key[i] > 'Z'){
+      key[i] = static_cast<char>(key[i] - 26);
+      key[i-1] = static_cast<char>(key[i-1] + 1);
+    }
+  }
+
+  return key;
+}
+
 
 class VigenereCipher {
 
 public:
   std::string key;
+  std::map<std::string, int> m;
 
-  VigenereCipher(std::string key){
+  void storeDict(std::string dictionaryFile){
+    std::ifstream file(dictionaryFile);
+    std::string line;
+
+    int i = 0;
+    while(std::getline(file, line)){
+      m.insert( std::pair<std::string,int>(line,i) );
+      i++;
+    }
+  }
+
+  VigenereCipher(std::string dictionaryFile){
+    storeDict(dictionaryFile);
+    setKey(key);
+  }
+
+  void setKey(std::string key){
     // Force key to uppercase alphanumeric
     for(int i = 0; i < key.size(); ++i){
       if(key[i] >= 'A' && key[i] <= 'Z'){
@@ -27,6 +69,7 @@ public:
         this -> key += key[i] + 'A' - 'a';
       }
     }
+
   }
 
   std::string encrypt(std::string text){
@@ -80,76 +123,53 @@ public:
 
     return decrypted;
   }
+  
+  void brutishDecrypt(std::string ciphertext, int keylength, int firstwordlength){
+    std::vector<std::string> list;
+
+
+    // Initialize key with a's
+    char arr[keylength];
+    char* keyArr = arr;
+
+    std::string plaintext = "";
+    std::string substring;
+
+    setKey(std::string(keyArr));
+
+    for(int i = 0; i < keylength; i++){
+      keyArr[i] = 'A';
+    }
+
+    std::map<std::string,int>::iterator it;
+
+    setKey(std::string(keyArr, keylength));
+
+    int i = 0;
+    while(!isZs(keyArr, keylength)){
+
+      plaintext = decrypt(ciphertext);
+      std::cout << plaintext << " " << i << " ";
+      substring = plaintext.substr(0, firstwordlength - 1);
+      it = m.find(substring);
+      i++;
+
+      char* newKey = keyInc(keyArr, keylength);
+      std::cout << std::string(newKey, keylength) << "\n";
+      //setKey(keyInc(keyArr, keylength));
+      setKey(std::string(newKey, keylength));
+    }
+
+
+  }
+
 };
 
-bool isZs(char key[]){
-  bool notzs = true;
-  for(int i = 0; i < key.size(); i++){
-    if(key[i] != 'Z'){
-      notzs = false;
-    }
-  }
-  return notzs;
-}
-
-void brutishDecrypt(std::string ciphertext, int keylength, int firstwordlength){
-  std::vector<std::string> list;
-
-  // Initialize key with a's
-  char key[keylength];
-  for(int i = 0; i < keylength; i++){
-    key[i] = 'a';
-  }
-
-  while(!isZs(key)){
-
-  }
-
-
-}
-
-
-
 int main(){
-  std::string key = "";
-  std::string tempLine;
-  std::string input = "";
 
-  // Read in key file
-  std::ifstream keystream ("key.txt");
-  if(keystream.is_open()){
-    while(keystream.good()){
-      // Read lines
-      getline(keystream,tempLine);
-      key = key + tempLine;
-    }
-    keystream.close();
-  }
-  else{
-    std::cout << "Unable to open key file" << std::endl << std::endl;
-  }
+  VigenereCipher engine = VigenereCipher("dict.txt"); 
 
-  VigenereCipher viginere(key);
+  //engine.brutishDecrypt(ciphertext, keylength, firstwordlength);
+  engine.brutishDecrypt("MSOKKJCOSXOEEKDTOSLGFWCMCHSUSGX", 2, 6);
 
-  std::string line;
-  // Read in plaintext input
-  std::ifstream inputstream ("input.txt");
-  if (inputstream.is_open()){
-    while (inputstream.good()){
-      // Read plaintext lines from file input
-      getline(inputstream,line);
-      input = input + line;
-    }
-    inputstream.close();
-  }
-  else{
-    std::cout << "Unable to open plaintext file" << std::endl << std::endl;
-  }
-
-  std::string encrypted = viginere.encrypt(input);
-  std::string decrypted = viginere.decrypt(encrypted);
-
-  std::cout << "Plaintext: " << input << std::endl;
-  std::cout << "Ciphertext: " << encrypted << std::endl;
-  std::cout << "Decrypted: " << decrypted << std::endl;
 }
