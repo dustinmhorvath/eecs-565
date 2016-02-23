@@ -1,0 +1,23 @@
+
+Starting bruteforce...
+
+Found string CAESAR at 15536 with key KS
+Completed with keylength 2 in 0.002856.
+Plaintext with key KS is CAESARSWIFEMUSTBEABOVESUSPICION
+
+Found string FORTUNE at 36539 with key JAY
+Completed with keylength 3 in 0.054156.
+Plaintext with key JAY is FORTUNEWHICHHASAGREATDEALOFPOWERINOTHERMATTERSBUTESPECIALLYINWARCANBRINGABOUTGREATCHANGESINASITUATIONTHROUGHVERYSLIGHTFORCES
+
+Found string EXPERIENCE at 111489 with key IWKD
+Completed with keylength 4 in 1.50433.
+Plaintext with key IWKD is EXPERIENCEISTHETEACHEROFALLTHINGS
+
+Found string IMAGINATION at 131832 with key ZIENF
+Completed with keylength 5 in 39.9312.
+Plaintext with key ZIENF is IMAGINATIONISMOREIMPORTANTTHANKNOWLEDGE
+
+Found string EDUCATION at 87268 with key HACKER
+Completed with keylength 6 in 1015.48.
+Plaintext with key HACKER is EDUCATIONISWHATREMAINSAFTERONEHASFORGOTTENWHATONEHASLEARNEDINSCHOOL
+

@@ -14,7 +14,8 @@
 #include <vector>
 #include <map>
 #include <queue>
-//#include <algorithm>
+#include <ctime>
+
 
 bool isZs(char* key, int keylength){
   bool notzs = true;
@@ -46,6 +47,7 @@ public:
   std::string key;
   std::map<std::string, int> m;
   std::queue<std::string> possiblekeys;
+//  std::map<std::string, int> darray[15];
 
   void storeDict(std::string dictionaryFile){
     std::ifstream file(dictionaryFile);
@@ -136,6 +138,8 @@ public:
 
   void brutishDecrypt(std::string ciphertext, int keylength, int firstwordlength){
     std::vector<std::string> list;
+    std::clock_t start;
+    double duration;
 
 
     // Initialize key with a's
@@ -154,13 +158,14 @@ public:
     setKey(std::string(keyArr, keylength));
 
     int i = 0;
+    start = std::clock();
     while(!isZs(keyArr, keylength)){
 
       plaintext = decrypt(ciphertext.substr(0, firstwordlength));
 
       auto it = m.find(plaintext);
       if (it != m.end()){
-        std::cout << "Found string " << plaintext << " at " << it->second << "\n";
+        std::cout << "Found string " << plaintext << " at " << it->second << " with key " << key << "\n";
         possiblekeys.push(key);
       }
 
@@ -168,20 +173,35 @@ public:
       setKey(std::string(newKey, keylength));
     }
 
-    //while this stuff
-    std::cout << possiblekeys.front() << std::endl;
-    setKey(possiblekeys.front());
-    plaintext = decrypt(ciphertext);
-    std::cout << "Plaintext with key " << key << " is " << plaintext << "\n";
+
+    duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+    while(!possiblekeys.empty()){
+      std::cout << "Completed with keylength " << key.length() << " in " << duration << ".\n";
+      setKey(possiblekeys.front());
+      plaintext = decrypt(ciphertext);
+      std::cout << "Plaintext with key " << key << " is " << plaintext << "\n";
+      possiblekeys.pop();
+    }
+    std::cout << std::endl;
+
   }
 
 };
 
 int main(){
 
+  std::cout << "\nStarting bruteforce...\n\n";
   VigenereCipher engine = VigenereCipher("dict.txt"); 
 
   //engine.brutishDecrypt(ciphertext, keylength, firstwordlength);
-  engine.brutishDecrypt("MSOKKJCOSXOEEKDTOSLGFWCMCHSUSGX", 2, 6); // KT is key (found by visual)
+  engine.brutishDecrypt("MSOKKJCOSXOEEKDTOSLGFWCMCHSUSGX", 2, 6); // KS
+  engine.brutishDecrypt("OOPCULNWFRCFQAQJGPNARMEYUODYOUNRGWORQEPVARCEPBBSCEQYEARAJUYGWWYACYWBPRNEJBMDTEAEYCCFJNENSGWAQRTSJTGXNRQRMDGFEEPHSJRGFCFMACCB", 3, 7);
+  engine.brutishDecrypt("MTZHZEOQKASVBDOWMWMKMNYIIHVWPEXJA", 4, 10);
+  engine.brutishDecrypt("HUETNMIXVTMQWZTQMMZUNZXNSSBLNSJVSJQDLKR", 5, 11);
+  engine.brutishDecrypt("LDWMEKPOPSWNOAVBIDHIPCEWAETYRVOAUPSINOVDIEDHCDSELHCCPVHRPOHZUSERSFS", 6, 9);
+  engine.brutishDecrypt("VVVLZWWPBWHZDKBTXLDCGOTGTGRWAQWZSDHEMXLBELUMO", 7, 13);
+
+
 
 }
