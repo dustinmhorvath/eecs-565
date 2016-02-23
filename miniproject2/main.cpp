@@ -12,6 +12,8 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <set>
+#include <algorithm>
 
 bool isZs(char* key, int keylength){
   bool notzs = true;
@@ -41,17 +43,27 @@ class VigenereCipher {
 
 public:
   std::string key;
-  std::map<std::string, int> m;
+  std::set<std::string> wordset;
+
 
   void storeDict(std::string dictionaryFile){
     std::ifstream file(dictionaryFile);
     std::string line;
 
-    int i = 0;
+    int i = 1;
     while(std::getline(file, line)){
-      m.insert( std::pair<std::string,int>(line,i) );
+      wordset.insert(line);
       i++;
     }
+
+    std::set<std::string>::const_iterator it = std::find(wordset.begin(), wordset.end(), "CAESAR");
+
+      if (it != wordset.end()){
+           std::cout << "Found '" << *it << "' in the vector." << std::endl;
+      }
+
+
+
   }
 
   VigenereCipher(std::string dictionaryFile){
@@ -70,6 +82,7 @@ public:
       }
     }
 
+    this -> key = key;
   }
 
   std::string encrypt(std::string text){
@@ -123,7 +136,7 @@ public:
 
     return decrypted;
   }
-  
+
   void brutishDecrypt(std::string ciphertext, int keylength, int firstwordlength){
     std::vector<std::string> list;
 
@@ -141,23 +154,24 @@ public:
       keyArr[i] = 'A';
     }
 
-    std::map<std::string,int>::iterator it;
-
     setKey(std::string(keyArr, keylength));
 
     int i = 0;
     while(!isZs(keyArr, keylength)){
 
-      plaintext = decrypt(ciphertext);
-      std::cout << plaintext << " " << i << " ";
-      substring = plaintext.substr(0, firstwordlength - 1);
-      it = m.find(substring);
+      plaintext = decrypt(ciphertext.substr(0, firstwordlength));
+      //std::cout << plaintext << " " << i << " ";
+      
+      std::set<std::string>::const_iterator it = std::find(wordset.begin(), wordset.end(), plaintext);
+
+      if (it != wordset.end()){
+           std::cout << "Found '" << *it << "' in the vector." << std::endl;
+      }
       i++;
 
       char* newKey = keyInc(keyArr, keylength);
-      std::cout << std::string(newKey, keylength) << "\n";
-      //setKey(keyInc(keyArr, keylength));
       setKey(std::string(newKey, keylength));
+      //std::cout << key << "\n";
     }
 
 
@@ -170,6 +184,6 @@ int main(){
   VigenereCipher engine = VigenereCipher("dict.txt"); 
 
   //engine.brutishDecrypt(ciphertext, keylength, firstwordlength);
-  engine.brutishDecrypt("MSOKKJCOSXOEEKDTOSLGFWCMCHSUSGX", 2, 6);
+  engine.brutishDecrypt("MSOKKJCOSXOEEKDTOSLGFWCMCHSUSGX", 2, 6); // KT is key (found by visual)
 
 }
