@@ -16,7 +16,7 @@
 #include <queue>
 #include <ctime>
 
-
+// Used for checking if a key has reached the end of the keyspace
 bool isZs(char* key, int keylength){
   bool notzs = true;
   for(int i = 0; i < keylength; i++){
@@ -27,6 +27,8 @@ bool isZs(char* key, int keylength){
   return notzs;
 }
 
+// Takes a key as a character array, and returns a new key incremented by one
+// character.
 char* keyInc(char* key, int keylength){
   key[keylength - 1] = static_cast<char>(key[keylength - 1] + 1);
 
@@ -49,6 +51,9 @@ public:
   std::queue<std::string> possiblekeys;
 //  std::map<std::string, int> darray[15];
 
+  // Stores the contents of the dictionary file into a std::map. This allows
+  // the dictionary to be searched in O(1) time, because *map* utilizes a hash
+  // table.
   void storeDict(std::string dictionaryFile){
     std::ifstream file(dictionaryFile);
     std::string line;
@@ -65,6 +70,7 @@ public:
     }
   }
 
+  // Stores the dictionary and sets the key.
   VigenereCipher(std::string dictionaryFile){
     storeDict(dictionaryFile);
     setKey(key);
@@ -81,6 +87,7 @@ public:
       }
     }
 
+    // Old system above. For this we're just storing it raw.
     this -> key = key;
   }
 
@@ -149,33 +156,40 @@ public:
     std::string plaintext = "";
     std::string substring;
 
-    setKey(std::string(keyArr));
-
+    // Start with all A's
     for(int i = 0; i < keylength; i++){
       keyArr[i] = 'A';
     }
 
+    // Store that key array as the key string
     setKey(std::string(keyArr, keylength));
 
     int i = 0;
     start = std::clock();
     while(!isZs(keyArr, keylength)){
 
+      // Decrypt with the firstwordlength of chars with the current key
       plaintext = decrypt(ciphertext.substr(0, firstwordlength));
 
+      // Search the hashmap for the plaintext
       auto it = m.find(plaintext);
+      // If found, push the key onto a queue<string>, then keep searching for
+      // more keys.
       if (it != m.end()){
         std::cout << "Found string " << plaintext << " at " << it->second << " with key " << key << "\n";
         possiblekeys.push(key);
       }
 
+      // Increment the key array
       char* newKey = keyInc(keyArr, keylength);
+      // Store the new key in the global key string
       setKey(std::string(newKey, keylength));
     }
 
 
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
+    // Dequeue all the possible keys and show the plaintext for each key
     while(!possiblekeys.empty()){
       std::cout << "Completed with keylength " << key.length() << " in " << duration << ".\n";
       setKey(possiblekeys.front());
